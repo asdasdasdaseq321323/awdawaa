@@ -832,7 +832,7 @@
 
             try {
               const controller = new AbortController();
-              const t = window.setTimeout(() => controller.abort(), 12000);
+              const t = window.setTimeout(() => controller.abort(), 20000);
 
               const res = await fetch("/api/contact", {
                 method: "POST",

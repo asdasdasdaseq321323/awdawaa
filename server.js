@@ -51,6 +51,13 @@ function makeTransporter() {
     port,
     secure,
     auth: { user, pass },
+    // Avoid hanging requests (causes frontend timeout)
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 12_000,
+    tls: {
+      servername: host,
+    },
   });
 }
 
