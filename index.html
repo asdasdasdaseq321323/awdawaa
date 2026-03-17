@@ -777,23 +777,6 @@
           const out = document.getElementById("formSuccess");
           if (!form || !out) return;
           const submitBtn = form.querySelector('button[type="submit"]');
-          const redirectInput = form.querySelector('input[name="redirect"]');
-          const url = new URL(window.location.href);
-          if (url.searchParams.get("sent") === "1") {
-            out.hidden = false;
-            out.textContent = "Děkujeme! Ozveme se co nejdříve.";
-            // Clean the URL (optional, keeps the page shareable)
-            url.searchParams.delete("sent");
-            window.history.replaceState({}, "", url.toString());
-          }
-
-          // Important: always redirect back to the current host (mobile-friendly, works on previews too)
-          if (redirectInput) {
-            const back = new URL(window.location.href);
-            back.searchParams.set("sent", "1");
-            back.hash = "contact";
-            redirectInput.value = back.toString();
-          }
 
           function setBusy(busy) {
             if (submitBtn) {
@@ -803,11 +786,41 @@
             }
           }
 
-          // For Static Site: use native POST to Web3Forms + redirect back to this page.
-          form.addEventListener("submit", () => {
-            setBusy(true);
-            out.hidden = false;
-            out.textContent = "Odesílám…";
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fd = new FormData(form);
+            const name = String(fd.get("name") || "").trim();
+            const email = String(fd.get("email") || "").trim();
+            const message = String(fd.get("message") || "").trim();
+
+            if (!name || !email || !message) {
+              out.hidden = false;
+              out.textContent = "Prosím vyplňte jméno, e‑mail a zprávu.";
+              return;
+            }
+
+            try {
+              setBusy(true);
+              out.hidden = false;
+              out.textContent = "Odesílám…";
+
+              const resp = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, message }),
+              });
+              const data = await resp.json().catch(() => ({}));
+              if (!resp.ok || data.ok !== true) {
+                throw new Error(data.error || "Odeslání se nepovedlo.");
+              }
+
+              out.textContent = "Děkujeme! Ozveme se co nejdříve.";
+              form.reset();
+            } catch (_err) {
+              out.textContent = "Odeslání se nepovedlo. Zkuste to prosím znovu za chvíli.";
+            } finally {
+              setBusy(false);
+            }
           });
         }
 
@@ -1127,8 +1140,6 @@
               class="form"
               id="leadForm"
               autocomplete="on"
-              action="https://api.web3forms.com/submit"
-              method="POST"
               novalidate
             >
               <div class="form__row">
@@ -1141,10 +1152,6 @@
                   <input name="email" type="email" placeholder="vy@firma.cz" required />
                 </label>
               </div>
-              <input type="hidden" name="access_key" value="0117c1dd-87c7-4cd1-95bb-3d70a7d1e8f0" />
-              <input type="hidden" name="redirect" value="" />
-              <input type="hidden" name="subject" value="Poptávka webu — DesignerWeb" />
-              <input type="hidden" name="from_name" value="designerweb.cz" />
               <label class="field">
                 <span class="field__label">Zpráva</span>
                 <textarea name="message" rows="4" placeholder="Co děláte a jaký web potřebujete?" required></textarea>
