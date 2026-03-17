@@ -795,53 +795,53 @@
           const form = document.getElementById("leadForm");
           const out = document.getElementById("formSuccess");
           if (!form || !out) return;
-          const submitBtn = form.querySelector('button[type="submit"]');
 
-          function setBusy(busy) {
-            if (submitBtn) {
-              submitBtn.disabled = busy;
-              submitBtn.style.opacity = busy ? "0.85" : "1";
-              submitBtn.style.pointerEvents = busy ? "none" : "auto";
-            }
+          function toast(msg) {
+            out.hidden = false;
+            out.textContent = msg;
           }
 
           form.addEventListener("submit", async (e) => {
             e.preventDefault();
+
             const fd = new FormData(form);
             const name = String(fd.get("name") || "").trim();
             const email = String(fd.get("email") || "").trim();
             const message = String(fd.get("message") || "").trim();
 
             if (!name || !email || !message) {
-              out.hidden = false;
-              out.textContent = "Prosím vyplňte jméno, e‑mail a zprávu.";
+              toast("Vyplňte prosím všechna pole.");
               return;
             }
 
-            try {
-              setBusy(true);
-              out.hidden = false;
-              out.textContent = "Odesílám…";
+            const btn = form.querySelector("button[type=submit]");
+            const originalText = btn ? btn.textContent : "";
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Odesílám…";
+            }
 
-              const resp = await fetch("/api/contact", {
+            try {
+              const res = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, message }),
               });
-              const data = await resp.json().catch(() => ({}));
-              if (!resp.ok || data.ok !== true) {
-                throw new Error(data.error || "Odeslání se nepovedlo.");
-              }
+              const data = await res.json().catch(() => ({}));
 
-              out.textContent = "Děkujeme! Ozveme se co nejdříve.";
-              form.reset();
-            } catch (_err) {
-              const msg = _err && typeof _err.message === "string" ? _err.message : "";
-              out.textContent = msg
-                ? `Odeslání se nepovedlo: ${msg}`
-                : "Odeslání se nepovedlo. Zkuste to prosím znovu za chvíli.";
+              if (data.ok) {
+                toast("Zpráva odeslána! Ozveme se co nejdříve.");
+                form.reset();
+              } else {
+                toast(data.error || "Odeslání se nepovedlo.");
+              }
+            } catch {
+              toast("Něco se pokazilo. Zkuste to znovu.");
             } finally {
-              setBusy(false);
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText || "Odeslat";
+              }
             }
           });
         }
