@@ -777,6 +777,7 @@
           const out = document.getElementById("formSuccess");
           if (!form || !out) return;
           const submitBtn = form.querySelector('button[type="submit"]');
+          const web3Url = "https://api.web3forms.com/submit";
 
           function setBusy(busy) {
             if (submitBtn) {
@@ -784,6 +785,32 @@
               submitBtn.style.opacity = busy ? "0.85" : "1";
               submitBtn.style.pointerEvents = busy ? "none" : "auto";
             }
+          }
+
+          async function submitViaBackend({ name, email, message, botcheck }) {
+            const resp = await fetch("/api/contact", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, email, message, botcheck }),
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || data.ok !== true) throw new Error(data.error || "Odeslání se nepovedlo.");
+          }
+
+          async function submitViaWeb3Forms(fd) {
+            const accessKey = String(fd.get("access_key") || "").trim();
+            if (!accessKey) throw new Error("Chybí access key.");
+
+            fd.set("subject", "Poptávka webu — DesignerWeb");
+            fd.set("from_name", "designerweb.cz");
+
+            const resp = await fetch(web3Url, {
+              method: "POST",
+              headers: { Accept: "application/json" },
+              body: fd,
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || data.success !== true) throw new Error(data.message || "Odeslání se nepovedlo.");
           }
 
           form.addEventListener("submit", async (e) => {
@@ -805,16 +832,13 @@
               out.textContent = "Odesílám…";
 
               const botcheck = String(fd.get("botcheck") || "").trim();
-
-              const resp = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, message, botcheck }),
-              });
-
-              const data = await resp.json().catch(() => ({}));
-              if (!resp.ok || data.ok !== true) {
-                throw new Error(data.error || "Odeslání se nepovedlo.");
+              // Prefer same-origin backend (most reliable on mobile). If it’s missing (e.g. static hosting),
+              // fall back to direct Web3Forms (still stays on-page, no redirect).
+              try {
+                await submitViaBackend({ name, email, message, botcheck });
+              } catch (_backendErr) {
+                const fd2 = new FormData(form);
+                await submitViaWeb3Forms(fd2);
               }
 
               out.textContent = "Děkujeme! Ozveme se co nejdříve.";
@@ -1150,6 +1174,7 @@
                   <input name="email" type="email" placeholder="vy@firma.cz" required />
                 </label>
               </div>
+              <input type="hidden" name="access_key" value="0117c1dd-87c7-4cd1-95bb-3d70a7d1e8f0" />
               <input
                 type="text"
                 name="botcheck"
