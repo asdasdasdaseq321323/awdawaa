@@ -75,11 +75,23 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       headers: { Accept: "application/json" },
       body: fd,
     });
-    const data = await resp.json().catch(() => ({}));
+    const raw = await resp.text();
+    let data = {};
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch {
+      data = {};
+    }
+
     if (!resp.ok || data.success !== true) {
+      const msg =
+        (data && typeof data.message === "string" && data.message.trim()) ||
+        (raw && raw.slice(0, 300).replace(/\s+/g, " ").trim()) ||
+        "Odeslání se nepovedlo (Web3Forms).";
+
       return res.status(502).json({
         ok: false,
-        error: data.message || "Odeslání se nepovedlo (Web3Forms).",
+        error: msg,
         status: resp.status,
       });
     }

@@ -269,7 +269,18 @@
         will-change: transform;
       }
       .topbar__actions .btn {
-        white-space: nowrap;
+        white-space: normal;
+        text-align: center;
+        max-width: min(42vw, 220px);
+      }
+
+      /* Mobile: prevent header CTA from forcing horizontal scroll */
+      @media (max-width: 420px) {
+        .topbar__actions .btn {
+          padding: 10px 12px;
+          font-size: 0.92rem;
+          max-width: 46vw;
+        }
       }
       .btn--lg {
         padding: 14px 18px;
@@ -688,6 +699,10 @@
       @media (min-width: 860px) {
         .nav {
           display: flex;
+        }
+        .topbar__actions .btn {
+          white-space: nowrap;
+          max-width: none;
         }
         .hero__inner {
           grid-template-columns: 1.1fr 0.9fr;
