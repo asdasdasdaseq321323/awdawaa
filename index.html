@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+
+    <title>DesignerWeb — Weby, které prodávají | designerweb.cz</title>
+    <meta
+      name="description"
+      content="DesignerWeb (designerweb.cz) — moderní weby pro malé firmy a podnikatele. Profesionální design, rychlé dodání, SEO-ready základ. Nezávazná konzultace zdarma."
+    />
+
+    <meta property="og:title" content="DesignerWeb — Weby, které prodávají" />
+    <meta
+      property="og:description"
+      content="Moderní weby pro malé firmy a podnikatele. Jednoduchý proces: konzultace → návrh → spuštění."
+    />
+    <meta property="og:type" content="website" />
+
+    <link rel="icon" type="image/png" href="./assets/favicon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --navy: #0d1321;
+        --cream: #ffeddf;
+        --gray: #7d7d7d;
+        --blue: #3855e8;
+        --bg: var(--navy);
+        --card: rgba(255, 237, 223, 0.06);
+        --card2: rgba(255, 237, 223, 0.08);
+        --border: rgba(255, 237, 223, 0.12);
+        --text: rgba(255, 237, 223, 0.92);
+        --muted: rgba(125, 125, 125, 0.92);
+        --shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
+        --radius-xl: 26px;
+        --radius-lg: 18px;
+        --radius-md: 14px;
+        --dur-1: 140ms;
+        --dur-2: 240ms;
+        --dur-3: 560ms;
+        --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        --ease-soft: cubic-bezier(0.25, 0.8, 0.25, 1);
+        --ring: rgba(56, 85, 232, 0.38);
+        --container: 1120px;
+        --gutter: 20px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+          "Apple Color Emoji", "Segoe UI Emoji";
+        color: var(--text);
+        background: radial-gradient(1200px 700px at 12% -8%, rgba(56, 85, 232, 0.24), transparent 60%),
+          radial-gradient(900px 600px at 108% 10%, rgba(56, 85, 232, 0.16), transparent 60%),
+          linear-gradient(180deg, #0d1321 0%, #0b1020 100%);
+        line-height: 1.55;
+        letter-spacing: -0.01em;
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      .container {
+        width: min(var(--container), calc(100% - (var(--gutter) * 2)));
+        margin-inline: auto;
+      }
+
+      .skip {
+        position: absolute;
+        left: -999px;
+        top: 10px;
+        z-index: 9999;
+        padding: 10px 14px;
+        background: rgba(255, 237, 223, 0.08);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+      }
+      .skip:focus {
+        left: 12px;
+        outline: 3px solid var(--ring);
+        outline-offset: 2px;
+      }
+
+      /* Background grid + noise */
+      .bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
+      .bg::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        background-image: linear-gradient(rgba(255, 237, 223, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 237, 223, 0.06) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(circle at 30% 10%, black 0%, transparent 65%);
+        opacity: 0.5;
+      }
+      .bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+        opacity: 0.32;
+        mix-blend-mode: overlay;
+      }
+
+      /* Typography */
+      .h1 {
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 1.02;
+        margin: 0 0 14px;
+        font-size: clamp(2.45rem, 4.6vw, 4.4rem);
+      }
+      .h2 {
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.08;
+        margin: 0 0 10px;
+        font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+      }
+      .h3 {
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px;
+        font-size: 1.2rem;
+      }
+      .lead {
+        margin: 0 0 18px;
+        max-width: 62ch;
+        color: rgba(255, 237, 223, 0.86);
+        font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .accent {
+        color: var(--cream);
+        text-shadow: 0 0 22px rgba(56, 85, 232, 0.55), 0 0 70px rgba(56, 85, 232, 0.18);
+      }
+      .chip {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 237, 223, 0.14);
+        background: rgba(255, 237, 223, 0.06);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: rgba(255, 237, 223, 0.84);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--blue);
+        box-shadow: 0 0 0 7px rgba(56, 85, 232, 0.14);
+      }
+
+      /* Navbar */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 1px solid rgba(255, 237, 223, 0.1);
+        background: rgba(13, 19, 33, 0.66);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      .topbar.is-elevated {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+      }
+      .topbar__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 0;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-width: max-content;
+      }
+      .brand__text {
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .brand__text .is-blue {
+        color: var(--blue);
+        text-shadow: 0 0 22px rgba(56, 85, 232, 0.45);
+      }
+      .brandword {
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+      }
+      .brandword .is-blue {
+        color: var(--blue);
+        text-shadow: 0 0 22px rgba(56, 85, 232, 0.45);
+      }
+      .nav {
+        display: none;
+        gap: 18px;
+        align-items: center;
+      }
+      .nav a {
+        color: rgba(255, 237, 223, 0.78);
+        transition: color var(--dur-2) var(--ease);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        font-size: 0.95rem;
+      }
+      .nav a:hover {
+        color: rgba(255, 237, 223, 0.96);
+      }
+      .topbar__actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border-radius: 999px;
+        padding: 12px 16px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        user-select: none;
+        transition: transform var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease),
+          background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        will-change: transform;
+      }
+      .btn--lg {
+        padding: 14px 18px;
+        font-size: 1rem;
+      }
+      .btn--primary {
+        color: var(--cream);
+        background: linear-gradient(135deg, rgba(56, 85, 232, 1), rgba(56, 85, 232, 0.72));
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.3), 0 18px 70px rgba(56, 85, 232, 0.22);
+      }
+      .btn--primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.42), 0 22px 90px rgba(56, 85, 232, 0.32);
+      }
+      .btn--ghost {
+        color: rgba(255, 237, 223, 0.86);
+        background: rgba(255, 237, 223, 0.06);
+        border-color: rgba(255, 237, 223, 0.16);
+      }
+      .btn--ghost:hover {
+        transform: translateY(-2px);
+        border-color: rgba(56, 85, 232, 0.45);
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.2), 0 18px 70px rgba(56, 85, 232, 0.12);
+      }
+      .btn:focus-visible {
+        outline: 3px solid var(--ring);
+        outline-offset: 2px;
+      }
+
+      /* Sections */
+      .section {
+        padding: clamp(56px, 7vw, 96px) 0;
+      }
+      .section__head {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 26px;
+        max-width: 72ch;
+      }
+      .divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 237, 223, 0.14), transparent);
+      }
+
+      /* Hero */
+      .hero {
+        position: relative;
+        padding: clamp(62px, 8vw, 110px) 0 56px;
+      }
+      .hero__inner {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 26px;
+        align-items: start;
+      }
+      .hero__bg {
+        position: absolute;
+        inset: -40px 0 auto 0;
+        height: 600px;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .orb {
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        border-radius: 999px;
+        filter: blur(34px);
+        opacity: 0.72;
+        transform: translateZ(0);
+      }
+      .orb--a {
+        left: -160px;
+        top: 40px;
+        background: radial-gradient(circle at 30% 30%, rgba(56, 85, 232, 0.65), transparent 60%);
+      }
+      .orb--b {
+        right: -220px;
+        top: -20px;
+        background: radial-gradient(circle at 40% 40%, rgba(56, 85, 232, 0.45), transparent 62%);
+      }
+      canvas#particles {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.55;
+      }
+      .hero__cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .hero__points {
+        list-style: none;
+        padding: 0;
+        margin: 18px 0 0;
+        display: grid;
+        gap: 8px;
+        color: rgba(255, 237, 223, 0.78);
+      }
+      .tick {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: rgba(56, 85, 232, 0.14);
+        border: 1px solid rgba(56, 85, 232, 0.26);
+        position: relative;
+        margin-right: 10px;
+        vertical-align: -3px;
+        box-shadow: 0 0 22px rgba(56, 85, 232, 0.14);
+      }
+      .tick::after {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 4px;
+        width: 6px;
+        height: 3px;
+        border-left: 2px solid rgba(255, 237, 223, 0.9);
+        border-bottom: 2px solid rgba(255, 237, 223, 0.9);
+        transform: rotate(-45deg);
+      }
+
+      /* Value props */
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 18px;
+        box-shadow: 0 0 0 1px rgba(255, 237, 223, 0.02);
+        transition: transform var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
+          box-shadow var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
+      }
+      .card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(56, 85, 232, 0.38);
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.22), 0 22px 90px rgba(56, 85, 232, 0.16);
+        background: var(--card2);
+      }
+      .icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        background: rgba(56, 85, 232, 0.12);
+        border: 1px solid rgba(56, 85, 232, 0.26);
+        box-shadow: 0 0 40px rgba(56, 85, 232, 0.12);
+        margin-bottom: 10px;
+        font-weight: 900;
+        color: var(--cream);
+        /* Emojis are usually color bitmaps — filter makes them appear “white” */
+        filter: grayscale(1) brightness(3) contrast(1.2);
+      }
+
+      /* How it works */
+      .steps {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 12px;
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 14px;
+        align-items: start;
+      }
+      .step__num {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        background: rgba(56, 85, 232, 0.14);
+        border: 1px solid rgba(56, 85, 232, 0.28);
+        box-shadow: 0 0 50px rgba(56, 85, 232, 0.14);
+      }
+
+      /* Portfolio */
+      .workgrid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .workcard {
+        overflow: hidden;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border);
+        background: rgba(255, 237, 223, 0.04);
+        transition: transform var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
+          box-shadow var(--dur-2) var(--ease);
+      }
+      .workcard:hover {
+        transform: translateY(-4px);
+        border-color: rgba(56, 85, 232, 0.44);
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.22), 0 26px 110px rgba(56, 85, 232, 0.18);
+      }
+      .thumb {
+        height: 180px;
+        position: relative;
+        border-bottom: 1px solid rgba(255, 237, 223, 0.12);
+        background: radial-gradient(900px 240px at 30% 20%, rgba(56, 85, 232, 0.18), transparent 60%),
+          linear-gradient(135deg, rgba(255, 237, 223, 0.06), rgba(0, 0, 0, 0.06));
+      }
+      .thumb::after {
+        content: "";
+        position: absolute;
+        inset: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 237, 223, 0.12);
+        background: linear-gradient(135deg, rgba(56, 85, 232, 0.18), rgba(56, 85, 232, 0.06));
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.12);
+      }
+      .workcard__body {
+        padding: 16px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(56, 85, 232, 0.28);
+        background: rgba(56, 85, 232, 0.12);
+        color: rgba(255, 237, 223, 0.86);
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+
+      /* Pricing */
+      .pricing {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .price {
+        display: grid;
+        gap: 10px;
+      }
+      .price__num {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+      }
+      .price__note {
+        color: rgba(255, 237, 223, 0.68);
+      }
+
+      /* Testimonials */
+      .quotes {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .quote blockquote {
+        margin: 0 0 14px;
+        color: rgba(255, 237, 223, 0.86);
+        font-size: 1.06rem;
+        letter-spacing: -0.01em;
+      }
+
+      /* Contact */
+      .cta {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 20px;
+        border-radius: calc(var(--radius-xl) + 6px);
+        border: 1px solid rgba(56, 85, 232, 0.22);
+        background: radial-gradient(1000px 420px at 25% 0%, rgba(56, 85, 232, 0.22), transparent 60%),
+          radial-gradient(900px 420px at 110% 10%, rgba(56, 85, 232, 0.16), transparent 60%),
+          rgba(255, 237, 223, 0.04);
+        box-shadow: 0 0 0 1px rgba(56, 85, 232, 0.12), 0 30px 120px rgba(0, 0, 0, 0.6);
+      }
+      .form {
+        background: rgba(255, 237, 223, 0.05);
+        border: 1px solid rgba(255, 237, 223, 0.12);
+        border-radius: var(--radius-xl);
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+      }
+      .form__row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+      .field__label {
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        font-size: 0.92rem;
+        color: rgba(255, 237, 223, 0.86);
+      }
+      input,
+      textarea {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 237, 223, 0.14);
+        background: rgba(0, 0, 0, 0.25);
+        color: rgba(255, 237, 223, 0.92);
+        padding: 12px 12px;
+        transition: border-color var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 120px;
+      }
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: rgba(56, 85, 232, 0.6);
+        box-shadow: 0 0 0 4px rgba(56, 85, 232, 0.16);
+      }
+      .form__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .fine {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(125, 125, 125, 0.92);
+      }
+      .success {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(56, 85, 232, 0.12);
+        border: 1px solid rgba(56, 85, 232, 0.22);
+        color: rgba(255, 237, 223, 0.92);
+      }
+
+      /* Footer */
+      .footer {
+        border-top: 1px solid rgba(255, 237, 223, 0.1);
+        padding: 38px 0 28px;
+        background: linear-gradient(180deg, rgba(13, 19, 33, 0.1), rgba(13, 19, 33, 0.75));
+      }
+      .footer__inner {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      .footer__cols {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .footer__col {
+        display: grid;
+        gap: 8px;
+      }
+      .footer__title {
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+      .footer a {
+        color: rgba(255, 237, 223, 0.74);
+        transition: color var(--dur-2) var(--ease);
+      }
+      .footer a:hover {
+        color: rgba(255, 237, 223, 0.96);
+      }
+      .footer__bottom {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 237, 223, 0.1);
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      /* Reveal */
+      .reveal {
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity var(--dur-3) var(--ease-soft), transform var(--dur-3) var(--ease-soft);
+      }
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .reveal,
+        .btn,
+        .card,
+        .workcard {
+          transition: none !important;
+        }
+        .reveal {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @media (min-width: 860px) {
+        .nav {
+          display: flex;
+        }
+        .hero__inner {
+          grid-template-columns: 1.1fr 0.9fr;
+          align-items: center;
+          gap: 28px;
+        }
+        .grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .steps {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .workgrid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .pricing {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .quotes {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .cta {
+          grid-template-columns: 1.1fr 0.9fr;
+          align-items: start;
+        }
+        .form__row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .footer__inner {
+          grid-template-columns: 1.1fr 0.9fr;
+        }
+        .footer__cols {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+    </style>
+
+    <script defer>
+      (function () {
+        const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function initHeaderElevate() {
+          const header = document.querySelector("[data-elevate]");
+          if (!header) return;
+          const onScroll = () => header.classList.toggle("is-elevated", (window.scrollY || 0) > 8);
+          onScroll();
+          window.addEventListener("scroll", onScroll, { passive: true });
+        }
+
+        function initSmoothAnchors() {
+          const links = Array.from(document.querySelectorAll('a[href^="#"]'));
+          for (const a of links) {
+            a.addEventListener("click", (e) => {
+              const href = a.getAttribute("href");
+              if (!href || href === "#") return;
+              const id = href.slice(1);
+              const target = document.getElementById(id);
+              if (!target) return;
+              e.preventDefault();
+              target.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+              history.pushState(null, "", href);
+            });
+          }
+        }
+
+        function initReveal() {
+          const els = Array.from(document.querySelectorAll("[data-reveal]"));
+          if (els.length === 0) return;
+          if (prefersReduced) {
+            els.forEach((el) => el.classList.add("is-visible"));
+            return;
+          }
+          const io = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                entry.target.classList.add("is-visible");
+                io.unobserve(entry.target);
+              }
+            },
+            { threshold: 0.12, rootMargin: "0px 0px -10% 0px" }
+          );
+          els.forEach((el, idx) => {
+            el.style.transitionDelay = `${Math.min(idx * 35, 420)}ms`;
+            io.observe(el);
+          });
+        }
+
+        function initForm() {
+          const form = document.getElementById("leadForm");
+          const out = document.getElementById("formSuccess");
+          if (!form || !out) return;
+          const submitBtn = form.querySelector('button[type="submit"]');
+          const emailFallback = form.querySelector('a[href^="mailto:"]');
+          const web3Url = "https://api.web3forms.com/submit";
+
+          function setBusy(busy) {
+            if (submitBtn) {
+              submitBtn.disabled = busy;
+              submitBtn.style.opacity = busy ? "0.85" : "1";
+              submitBtn.style.pointerEvents = busy ? "none" : "auto";
+            }
+          }
+
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fd = new FormData(form);
+            const name = String(fd.get("name") || "").trim();
+            const email = String(fd.get("email") || "").trim();
+            const message = String(fd.get("message") || "").trim();
+            const website = String(fd.get("website") || "").trim(); // honeypot
+
+            if (!name || !email || !message) {
+              out.hidden = false;
+              out.textContent = "Prosím vyplňte jméno, e‑mail a zprávu.";
+              return;
+            }
+
+            try {
+              setBusy(true);
+              out.hidden = false;
+              out.textContent = "Odesílám…";
+
+              // Web3Forms: submit as JSON
+              const accessKey = String(fd.get("access_key") || "").trim();
+              const payload = {
+                access_key: accessKey,
+                name,
+                email,
+                message,
+                website, // honeypot field (bots fill it)
+                subject: "Poptávka webu — DesignerWeb",
+                from_name: "designerweb.cz",
+              };
+
+              const resp = await fetch(web3Url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+
+              const data = await resp.json().catch(() => ({}));
+              if (!resp.ok || data.success !== true) {
+                throw new Error(data.message || "Odeslání se nepovedlo.");
+              }
+
+              out.textContent = "Děkujeme! Ozveme se co nejdříve.";
+              form.reset();
+            } catch (_err) {
+              out.textContent = "Odeslání se nepovedlo. Zkuste to prosím znovu za chvíli.";
+              if (emailFallback) emailFallback.focus?.();
+            } finally {
+              setBusy(false);
+            }
+          });
+        }
+
+        function initYear() {
+          const y = document.getElementById("year");
+          if (y) y.textContent = String(new Date().getFullYear());
+        }
+
+        function initParticles() {
+          const canvas = document.getElementById("particles");
+          if (!canvas || prefersReduced) return;
+          const ctx = canvas.getContext("2d", { alpha: true });
+          if (!ctx) return;
+
+          let w = 0;
+          let h = 0;
+          let dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+          const dots = [];
+          const DOTS = 46;
+
+          function resize() {
+            const rect = canvas.getBoundingClientRect();
+            w = Math.max(1, Math.floor(rect.width));
+            h = Math.max(1, Math.floor(rect.height));
+            dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          }
+
+          function rand(min, max) {
+            return min + Math.random() * (max - min);
+          }
+
+          function init() {
+            dots.length = 0;
+            for (let i = 0; i < DOTS; i++) {
+              dots.push({
+                x: rand(0, w),
+                y: rand(0, h),
+                r: rand(0.8, 2.2),
+                vx: rand(-0.22, 0.22),
+                vy: rand(-0.18, 0.18),
+                a: rand(0.18, 0.6),
+              });
+            }
+          }
+
+          function step() {
+            ctx.clearRect(0, 0, w, h);
+            // soft glow layer
+            for (const p of dots) {
+              p.x += p.vx;
+              p.y += p.vy;
+              if (p.x < -20) p.x = w + 20;
+              if (p.x > w + 20) p.x = -20;
+              if (p.y < -20) p.y = h + 20;
+              if (p.y > h + 20) p.y = -20;
+
+              ctx.beginPath();
+              ctx.fillStyle = `rgba(56, 85, 232, ${p.a})`;
+              ctx.shadowColor = "rgba(56, 85, 232, 0.55)";
+              ctx.shadowBlur = 18;
+              ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // subtle connecting lines
+            ctx.shadowBlur = 0;
+            for (let i = 0; i < dots.length; i++) {
+              for (let j = i + 1; j < dots.length; j++) {
+                const a = dots[i];
+                const b = dots[j];
+                const dx = a.x - b.x;
+                const dy = a.y - b.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 140) continue;
+                const t = 1 - dist / 140;
+                ctx.strokeStyle = `rgba(56, 85, 232, ${0.06 * t})`;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+              }
+            }
+
+            requestAnimationFrame(step);
+          }
+
+          resize();
+          init();
+          step();
+          window.addEventListener("resize", () => {
+            resize();
+            init();
+          });
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+          initHeaderElevate();
+          initSmoothAnchors();
+          initReveal();
+          initForm();
+          initYear();
+          initParticles();
+        });
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div class="bg" aria-hidden="true"></div>
+    <a class="skip" href="#main">Přeskočit na obsah</a>
+
+    <header class="topbar" data-elevate>
+      <div class="container topbar__inner">
+        <a class="brand" href="#top" aria-label="DesignerWeb">
+          <span class="brand__text"><span>Designer</span><span class="is-blue">Web</span></span>
+        </a>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav__link" href="#why">Proč my</a>
+          <a class="nav__link" href="#how">Jak to funguje</a>
+          <a class="nav__link" href="#pricing">Cena</a>
+          <a class="nav__link" href="#contact">Kontakt</a>
+        </nav>
+
+        <div class="topbar__actions">
+          <a class="btn btn--ghost" href="#pricing">Ceník</a>
+          <a class="btn btn--primary" href="#contact">Nezávazná konzultace</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="top" class="hero">
+        <div class="hero__bg" aria-hidden="true">
+          <div class="orb orb--a"></div>
+          <div class="orb orb--b"></div>
+          <canvas id="particles"></canvas>
+        </div>
+
+        <div class="container hero__inner">
+          <div class="hero__content">
+            <p class="chip reveal" data-reveal>
+              Webové studio pro malé firmy & podnikatele
+            </p>
+
+            <h1 class="h1 reveal" data-reveal>Weby, které <span class="accent">prodávají.</span></h1>
+
+            <p class="lead reveal" data-reveal>
+              Jste šikovní v tom, co děláte. My to přeložíme do webu, který vypadá profesionálně, načítá se rychle a vede
+              návštěvníky k akci. Bez technického stresu.
+            </p>
+
+            <div class="hero__cta reveal" data-reveal>
+              <a class="btn btn--primary btn--lg" href="#contact">Chci web</a>
+              <a class="btn btn--ghost btn--lg" href="#how">Jak to funguje</a>
+            </div>
+
+            <ul class="hero__points reveal" data-reveal>
+              <li><span class="tick" aria-hidden="true"></span> Rychlé dodání a jasný plán</li>
+              <li><span class="tick" aria-hidden="true"></span> Moderní design + skvělý mobil</li>
+              <li><span class="tick" aria-hidden="true"></span> Struktura a CTA, které zvyšují poptávky</li>
+            </ul>
+          </div>
+
+          <div class="reveal" data-reveal>
+            <div class="card">
+              <div class="h3" style="margin-bottom: 6px">Nejste si jistí, co potřebujete?</div>
+              <p class="muted" style="margin: 0 0 14px">
+                Napište 2 věty o vašem podnikání. Odpovíme s návrhem struktury webu, CTA a dalším krokem.
+              </p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <span class="badge">Konzultace zdarma</span>
+                <span class="badge">Bez závazků</span>
+                <span class="badge">Rychlá odpověď</span>
+              </div>
+              <div style="height: 14px"></div>
+              <a class="btn btn--primary" href="#contact">Chci nezávaznou konzultaci</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="why" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2 class="h2 reveal" data-reveal>
+              Proč <span class="brandword"><span>Designer</span><span class="is-blue">Web</span></span>
+            </h2>
+            <p class="muted reveal" data-reveal>Jednoduše: děláme weby, které vypadají luxusně a zároveň fungují.</p>
+          </div>
+
+          <div class="grid">
+            <article class="card reveal" data-reveal>
+              <div class="icon" aria-hidden="true">🚀</div>
+              <h3 class="h3">Rychlé dodání</h3>
+              <p class="muted" style="margin: 0">Jasný proces, termíny a průběžné preview. Bez překvapení.</p>
+            </article>
+            <article class="card reveal" data-reveal>
+              <div class="icon" aria-hidden="true">✦</div>
+              <h3 class="h3">Design na míru</h3>
+              <p class="muted" style="margin: 0">Ne šablona. Váš brand, váš tón, vaše cíle.</p>
+            </article>
+            <article class="card reveal" data-reveal>
+              <div class="icon" aria-hidden="true">🔎</div>
+              <h3 class="h3">SEO-ready základ</h3>
+              <p class="muted" style="margin: 0">Struktura, rychlost a obsah připravené pro vyhledávače.</p>
+            </article>
+            <article class="card reveal" data-reveal>
+              <div class="icon" aria-hidden="true">☰</div>
+              <h3 class="h3">Podpora po spuštění</h3>
+              <p class="muted" style="margin: 0">Úpravy, rozšíření, doporučení. Když potřebujete, jsme tu.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="how" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2 class="h2 reveal" data-reveal>Jak to funguje</h2>
+            <p class="muted reveal" data-reveal>3 kroky. Žádné technické složitosti. Jen výsledek.</p>
+          </div>
+
+          <ol class="steps">
+            <li class="card reveal" data-reveal>
+              <div class="step">
+                <div class="step__num">1</div>
+                <div>
+                  <div class="h3">Konzultace</div>
+                  <div class="muted">Zjistíme cíle, nabídku a komu prodáváte. Navrhneme strukturu a CTA.</div>
+                </div>
+              </div>
+            </li>
+            <li class="card reveal" data-reveal>
+              <div class="step">
+                <div class="step__num">2</div>
+                <div>
+                  <div class="h3">Návrh</div>
+                  <div class="muted">Design na míru + copy, které lidé pochopí během pár vteřin.</div>
+                </div>
+              </div>
+            </li>
+            <li class="card reveal" data-reveal>
+              <div class="step">
+                <div class="step__num">3</div>
+                <div>
+                  <div class="h3">Spuštění</div>
+                  <div class="muted">Rychlý web, měření, finální doladění. A můžete sbírat poptávky.</div>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="pricing" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2 class="h2 reveal" data-reveal>Cena</h2>
+            <p class="muted reveal" data-reveal>Jasný start. Přesnou cenu upřesníme po konzultaci.</p>
+          </div>
+
+          <div class="pricing">
+            <div class="card reveal" data-reveal>
+              <div class="price">
+                <div class="badge">Start</div>
+                <div class="h3">One-page web</div>
+                <div class="price__num">od 12&nbsp;900 Kč</div>
+                <div class="price__note">Ideální pro služby, lokální podniky a první web.</div>
+              </div>
+            </div>
+            <div class="card reveal" data-reveal>
+              <div class="price">
+                <div class="badge">Nejčastější</div>
+                <div class="h3">Firemní web</div>
+                <div class="price__num">od 24&nbsp;900 Kč</div>
+                <div class="price__note">Více stránek, jasná struktura, důvěra, poptávky.</div>
+              </div>
+            </div>
+            <div class="card reveal" data-reveal>
+              <div class="price">
+                <div class="badge">Růst</div>
+                <div class="h3">E‑shop</div>
+                <div class="price__num">Individuální</div>
+                <div class="price__note">Podle počtu produktů, plateb, dopravy a napojení (faktury, sklad, feedy).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="contact" class="section">
+        <div class="container">
+          <div class="cta reveal" data-reveal>
+            <div>
+              <h2 class="h2">Připraveni začít?</h2>
+              <p class="lead">Napište nám. Odpovíme s konkrétním návrhem dalšího kroku.</p>
+              <ul class="hero__points" style="margin-top: 0">
+                <li><span class="tick" aria-hidden="true"></span> Nezávazně</li>
+                <li><span class="tick" aria-hidden="true"></span> Rychlá odpověď</li>
+                <li><span class="tick" aria-hidden="true"></span> Jasný plán a termín</li>
+              </ul>
+            </div>
+
+            <form class="form" id="leadForm" autocomplete="on" action="https://api.web3forms.com/submit" method="POST">
+              <div class="form__row">
+                <label class="field">
+                  <span class="field__label">Jméno</span>
+                  <input name="name" type="text" placeholder="Vaše jméno" required />
+                </label>
+                <label class="field">
+                  <span class="field__label">E-mail</span>
+                  <input name="email" type="email" placeholder="vy@firma.cz" required />
+                </label>
+              </div>
+              <input type="hidden" name="access_key" value="0117c1dd-87c7-4cd1-95bb-3d70a7d1e8f0" />
+              <input
+                type="text"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+                aria-hidden="true"
+                style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden"
+              />
+              <label class="field">
+                <span class="field__label">Zpráva</span>
+                <textarea name="message" rows="4" placeholder="Co děláte a jaký web potřebujete?" required></textarea>
+              </label>
+              <div class="form__actions">
+                <button class="btn btn--primary btn--lg" type="submit">Odeslat</button>
+              </div>
+              <p class="fine">Odesláním souhlasíte, že vás můžeme kontaktovat ohledně poptávky.</p>
+              <p class="success" id="formSuccess" role="status" aria-live="polite" hidden></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <div class="footer__brand">
+          <div class="brandline" style="display: inline-flex; align-items: center; gap: 10px; margin-bottom: 8px">
+            <strong class="brandword"><span>Designer</span><span class="is-blue">Web</span></strong>
+          </div>
+          <div class="muted">Weby pro malé firmy a podnikatele.</div>
+          <div class="muted" style="margin-top: 6px">designerweb.cz</div>
+        </div>
+
+        <div class="footer__cols">
+          <div class="footer__col">
+            <div class="footer__title">Navigation</div>
+            <a href="#why">Proč my</a>
+            <a href="#how">Jak to funguje</a>
+            <a href="#pricing">Cena</a>
+            <a href="#contact">Kontakt</a>
+          </div>
+          <div class="footer__col">
+            <div class="footer__title">Contact</div>
+            <a href="mailto:info@designerweb.cz">info@designerweb.cz</a>
+            <span class="muted">IČO: 00000000</span>
+          </div>
+          <div class="footer__col">
+            <div class="footer__title">Social</div>
+            <a href="#top" aria-label="Instagram (placeholder)">Instagram</a>
+            <a href="#top" aria-label="LinkedIn (placeholder)">LinkedIn</a>
+            <a href="#top" aria-label="Behance (placeholder)">Behance</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="container footer__bottom">
+        <span class="muted"
+          >© <span id="year"></span> <span class="brandword"><span>Designer</span><span class="is-blue">Web</span></span></span
+        >
+        <span class="muted">designerweb.cz</span>
+      </div>
+    </footer>
+  </body>
+</html>
