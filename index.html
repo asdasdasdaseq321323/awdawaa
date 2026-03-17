@@ -777,6 +777,7 @@
           const out = document.getElementById("formSuccess");
           if (!form || !out) return;
           const submitBtn = form.querySelector('button[type="submit"]');
+          const redirectInput = form.querySelector('input[name="redirect"]');
           const url = new URL(window.location.href);
           if (url.searchParams.get("sent") === "1") {
             out.hidden = false;
@@ -784,6 +785,14 @@
             // Clean the URL (optional, keeps the page shareable)
             url.searchParams.delete("sent");
             window.history.replaceState({}, "", url.toString());
+          }
+
+          // Important: always redirect back to the current host (mobile-friendly, works on previews too)
+          if (redirectInput) {
+            const back = new URL(window.location.href);
+            back.searchParams.set("sent", "1");
+            back.hash = "contact";
+            redirectInput.value = back.toString();
           }
 
           function setBusy(busy) {
@@ -1133,7 +1142,7 @@
                 </label>
               </div>
               <input type="hidden" name="access_key" value="0117c1dd-87c7-4cd1-95bb-3d70a7d1e8f0" />
-              <input type="hidden" name="redirect" value="https://designerweb.cz/?sent=1#contact" />
+              <input type="hidden" name="redirect" value="" />
               <input type="hidden" name="subject" value="Poptávka webu — DesignerWeb" />
               <input type="hidden" name="from_name" value="designerweb.cz" />
               <input
