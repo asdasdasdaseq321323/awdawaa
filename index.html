@@ -777,7 +777,14 @@
           const out = document.getElementById("formSuccess");
           if (!form || !out) return;
           const submitBtn = form.querySelector('button[type="submit"]');
-          const web3Url = "https://api.web3forms.com/submit";
+          const url = new URL(window.location.href);
+          if (url.searchParams.get("sent") === "1") {
+            out.hidden = false;
+            out.textContent = "Děkujeme! Ozveme se co nejdříve.";
+            // Clean the URL (optional, keeps the page shareable)
+            url.searchParams.delete("sent");
+            window.history.replaceState({}, "", url.toString());
+          }
 
           function setBusy(busy) {
             if (submitBtn) {
@@ -787,67 +794,11 @@
             }
           }
 
-          async function submitViaBackend({ name, email, message, botcheck }) {
-            const resp = await fetch("/api/contact", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, email, message, botcheck }),
-            });
-            const data = await resp.json().catch(() => ({}));
-            if (!resp.ok || data.ok !== true) throw new Error(data.error || "Odeslání se nepovedlo.");
-          }
-
-          async function submitViaWeb3Forms(fd) {
-            const accessKey = String(fd.get("access_key") || "").trim();
-            if (!accessKey) throw new Error("Chybí access key.");
-
-            fd.set("subject", "Poptávka webu — DesignerWeb");
-            fd.set("from_name", "designerweb.cz");
-
-            const resp = await fetch(web3Url, {
-              method: "POST",
-              headers: { Accept: "application/json" },
-              body: fd,
-            });
-            const data = await resp.json().catch(() => ({}));
-            if (!resp.ok || data.success !== true) throw new Error(data.message || "Odeslání se nepovedlo.");
-          }
-
-          form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const fd = new FormData(form);
-            const name = String(fd.get("name") || "").trim();
-            const email = String(fd.get("email") || "").trim();
-            const message = String(fd.get("message") || "").trim();
-
-            if (!name || !email || !message) {
-              out.hidden = false;
-              out.textContent = "Prosím vyplňte jméno, e‑mail a zprávu.";
-              return;
-            }
-
-            try {
-              setBusy(true);
-              out.hidden = false;
-              out.textContent = "Odesílám…";
-
-              const botcheck = String(fd.get("botcheck") || "").trim();
-              // Prefer same-origin backend (most reliable on mobile). If it’s missing (e.g. static hosting),
-              // fall back to direct Web3Forms (still stays on-page, no redirect).
-              try {
-                await submitViaBackend({ name, email, message, botcheck });
-              } catch (_backendErr) {
-                const fd2 = new FormData(form);
-                await submitViaWeb3Forms(fd2);
-              }
-
-              out.textContent = "Děkujeme! Ozveme se co nejdříve.";
-              form.reset();
-            } catch (_err) {
-              out.textContent = "Odeslání se nepovedlo. Zkuste to prosím znovu, nebo napište na info@designerweb.cz.";
-            } finally {
-              setBusy(false);
-            }
+          // For Static Site: use native POST to Web3Forms + redirect back to this page.
+          form.addEventListener("submit", () => {
+            setBusy(true);
+            out.hidden = false;
+            out.textContent = "Odesílám…";
           });
         }
 
@@ -1163,7 +1114,14 @@
               </ul>
             </div>
 
-            <form class="form" id="leadForm" autocomplete="on" novalidate>
+            <form
+              class="form"
+              id="leadForm"
+              autocomplete="on"
+              action="https://api.web3forms.com/submit"
+              method="POST"
+              novalidate
+            >
               <div class="form__row">
                 <label class="field">
                   <span class="field__label">Jméno</span>
@@ -1175,6 +1133,9 @@
                 </label>
               </div>
               <input type="hidden" name="access_key" value="0117c1dd-87c7-4cd1-95bb-3d70a7d1e8f0" />
+              <input type="hidden" name="redirect" value="https://designerweb.cz/?sent=1#contact" />
+              <input type="hidden" name="subject" value="Poptávka webu — DesignerWeb" />
+              <input type="hidden" name="from_name" value="designerweb.cz" />
               <input
                 type="text"
                 name="botcheck"
