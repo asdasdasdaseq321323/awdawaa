@@ -93,10 +93,31 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error(err);
+    console.error("CONTACT_SEND_ERROR", {
+      message: err && err.message,
+      code: err && err.code,
+      responseCode: err && err.responseCode,
+      command: err && err.command,
+    });
     const msg = err && typeof err.message === "string" ? err.message : "";
     if (msg.startsWith("Missing env var:")) {
       return res.status(500).json({ ok: false, error: msg });
+    }
+    const code = err && typeof err.code === "string" ? err.code : "";
+    const responseCode = err && typeof err.responseCode === "number" ? err.responseCode : undefined;
+
+    // Return a useful, non-sensitive error for setup issues.
+    if (code === "EAUTH" || responseCode === 535) {
+      return res.status(500).json({
+        ok: false,
+        error: "SMTP přihlášení selhalo (zkontrolujte SMTP_USER/SMTP_PASS).",
+      });
+    }
+    if (code === "ETIMEDOUT" || code === "ESOCKET" || code === "ECONNECTION" || code === "ECONNRESET") {
+      return res.status(500).json({
+        ok: false,
+        error: "Nepodařilo se připojit k SMTP serveru (zkontrolujte SMTP_HOST/SMTP_PORT/SMTP_SECURE).",
+      });
     }
     return res.status(500).json({
       ok: false,

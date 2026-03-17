@@ -22,10 +22,19 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <style>
       :root {
@@ -822,21 +831,35 @@
             }
 
             try {
+              const controller = new AbortController();
+              const t = window.setTimeout(() => controller.abort(), 12000);
+
               const res = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, message }),
+                signal: controller.signal,
               });
-              const data = await res.json().catch(() => ({}));
+              window.clearTimeout(t);
 
-              if (data.ok) {
+              const ct = res.headers.get("content-type") || "";
+              const data = ct.includes("application/json") ? await res.json().catch(() => ({})) : {};
+
+              if (res.ok && data.ok) {
                 toast("Zpráva odeslána! Ozveme se co nejdříve.");
                 form.reset();
               } else {
-                toast(data.error || "Odeslání se nepovedlo.");
+                const msg =
+                  (data && typeof data.error === "string" && data.error) ||
+                  `Odeslání se nepovedlo (HTTP ${res.status}).`;
+                toast(msg);
               }
-            } catch {
-              toast("Něco se pokazilo. Zkuste to znovu.");
+            } catch (err) {
+              const msg =
+                err && err.name === "AbortError"
+                  ? "Odesílání trvá příliš dlouho. Zkuste to prosím znovu."
+                  : "Něco se pokazilo. Zkuste to znovu.";
+              toast(msg);
             } finally {
               if (btn) {
                 btn.disabled = false;
