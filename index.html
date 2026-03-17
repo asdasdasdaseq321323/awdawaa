@@ -788,13 +788,11 @@
           }
 
           form.addEventListener("submit", async (e) => {
-            if (form.dataset.nativeSubmit === "1") return;
             e.preventDefault();
             const fd = new FormData(form);
             const name = String(fd.get("name") || "").trim();
             const email = String(fd.get("email") || "").trim();
             const message = String(fd.get("message") || "").trim();
-            const botcheck = String(fd.get("botcheck") || "").trim(); // honeypot (avoid autofill)
 
             if (!name || !email || !message) {
               out.hidden = false;
@@ -807,22 +805,17 @@
               out.hidden = false;
               out.textContent = "Odesílám…";
 
-              // Web3Forms: submit as JSON
-              const accessKey = String(fd.get("access_key") || "").trim();
-              const payload = {
-                access_key: accessKey,
-                name,
-                email,
-                message,
-                botcheck, // honeypot field (bots fill it)
-                subject: "Poptávka webu — DesignerWeb",
-                from_name: "designerweb.cz",
-              };
+              // Web3Forms: submit as FormData (more reliable on mobile / CORS)
+              fd.set("name", name);
+              fd.set("email", email);
+              fd.set("message", message);
+              fd.set("subject", "Poptávka webu — DesignerWeb");
+              fd.set("from_name", "designerweb.cz");
 
               const resp = await fetch(web3Url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                headers: { Accept: "application/json" },
+                body: fd,
               });
 
               const data = await resp.json().catch(() => ({}));
@@ -833,12 +826,7 @@
               out.textContent = "Děkujeme! Ozveme se co nejdříve.";
               form.reset();
             } catch (_err) {
-              // Some mobile browsers can block cross-origin fetch; fallback to native form POST.
-              out.textContent = "Odesílání…";
-              setBusy(false);
-              form.dataset.nativeSubmit = "1";
-              form.submit();
-              return;
+              out.textContent = "Odeslání se nepovedlo. Zkuste to prosím znovu, nebo napište na info@designerweb.cz.";
             } finally {
               setBusy(false);
             }
@@ -1157,7 +1145,7 @@
               </ul>
             </div>
 
-            <form class="form" id="leadForm" autocomplete="on" action="https://api.web3forms.com/submit" method="POST">
+            <form class="form" id="leadForm" autocomplete="on" novalidate>
               <div class="form__row">
                 <label class="field">
                   <span class="field__label">Jméno</span>
