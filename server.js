@@ -4,7 +4,6 @@ const express = require("express");
 const helmet = require("helmet");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
-const nodemailer = require("nodemailer");
 
 const app = express();
 
@@ -39,31 +38,16 @@ function requiredEnv(name) {
   return v;
 }
 
-function makeTransporter() {
-  const host = requiredEnv("SMTP_HOST");
-  const port = Number(requiredEnv("SMTP_PORT"));
-  const secure = String(process.env.SMTP_SECURE || "").toLowerCase() === "true" || port === 465;
-  const user = requiredEnv("SMTP_USER");
-  const pass = requiredEnv("SMTP_PASS");
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-  });
-}
-
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
-    const { name, email, message, website } = req.body || {};
+    const { name, email, message, botcheck } = req.body || {};
 
     // Honeypot: bots often fill this hidden field
-    if (website) return res.status(200).json({ ok: true });
+    if (botcheck) return res.status(200).json({ ok: true });
 
     const cleanName = String(name || "").trim().slice(0, 120);
     const cleanEmail = String(email || "").trim().slice(0, 200);
@@ -76,21 +60,25 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       return res.status(400).json({ ok: false, error: "Zadejte prosím platný e‑mail." });
     }
 
-    const toEmail = requiredEnv("TO_EMAIL");
-    const fromEmail = requiredEnv("FROM_EMAIL"); // must be allowed by your SMTP provider
+    const accessKey = requiredEnv("WEB3FORMS_ACCESS_KEY");
 
-    const transporter = makeTransporter();
+    const fd = new FormData();
+    fd.set("access_key", accessKey);
+    fd.set("name", cleanName);
+    fd.set("email", cleanEmail);
+    fd.set("message", cleanMessage);
+    fd.set("subject", "Poptávka webu — DesignerWeb");
+    fd.set("from_name", "designerweb.cz");
 
-    const subject = `Poptávka webu — DesignerWeb (${cleanName})`;
-    const text = `Jméno: ${cleanName}\nE-mail: ${cleanEmail}\n\nZpráva:\n${cleanMessage}\n\n— Odesláno z designerweb.cz`;
-
-    await transporter.sendMail({
-      from: `DesignerWeb <${fromEmail}>`,
-      to: toEmail,
-      replyTo: cleanEmail,
-      subject,
-      text,
+    const resp = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: fd,
     });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || data.success !== true) {
+      return res.status(502).json({ ok: false, error: data.message || "Odeslání se nepovedlo." });
+    }
 
     return res.status(200).json({ ok: true });
   } catch (err) {

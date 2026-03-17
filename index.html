@@ -777,7 +777,6 @@
           const out = document.getElementById("formSuccess");
           if (!form || !out) return;
           const submitBtn = form.querySelector('button[type="submit"]');
-          const web3Url = "https://api.web3forms.com/submit";
 
           function setBusy(busy) {
             if (submitBtn) {
@@ -805,22 +804,17 @@
               out.hidden = false;
               out.textContent = "Odesílám…";
 
-              // Web3Forms: submit as FormData (more reliable on mobile / CORS)
-              fd.set("name", name);
-              fd.set("email", email);
-              fd.set("message", message);
-              fd.set("subject", "Poptávka webu — DesignerWeb");
-              fd.set("from_name", "designerweb.cz");
+              const botcheck = String(fd.get("botcheck") || "").trim();
 
-              const resp = await fetch(web3Url, {
+              const resp = await fetch("/api/contact", {
                 method: "POST",
-                headers: { Accept: "application/json" },
-                body: fd,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, message, botcheck }),
               });
 
               const data = await resp.json().catch(() => ({}));
-              if (!resp.ok || data.success !== true) {
-                throw new Error(data.message || "Odeslání se nepovedlo.");
+              if (!resp.ok || data.ok !== true) {
+                throw new Error(data.error || "Odeslání se nepovedlo.");
               }
 
               out.textContent = "Děkujeme! Ozveme se co nejdříve.";
@@ -1156,7 +1150,6 @@
                   <input name="email" type="email" placeholder="vy@firma.cz" required />
                 </label>
               </div>
-              <input type="hidden" name="access_key" value="0117c1dd-87c7-4cd1-95bb-3d70a7d1e8f0" />
               <input
                 type="text"
                 name="botcheck"
