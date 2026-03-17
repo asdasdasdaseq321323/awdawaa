@@ -77,13 +77,24 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok || data.success !== true) {
-      return res.status(502).json({ ok: false, error: data.message || "Odeslání se nepovedlo." });
+      return res.status(502).json({
+        ok: false,
+        error: data.message || "Odeslání se nepovedlo (Web3Forms).",
+        status: resp.status,
+      });
     }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ ok: false, error: "Omlouváme se, odeslání se nepovedlo. Zkuste to prosím znovu." });
+    const msg = err && typeof err.message === "string" ? err.message : "";
+    if (msg.startsWith("Missing env var:")) {
+      return res.status(500).json({ ok: false, error: msg });
+    }
+    return res.status(500).json({
+      ok: false,
+      error: "Omlouváme se, odeslání se nepovedlo. Zkuste to prosím znovu.",
+    });
   }
 });
 

@@ -258,6 +258,7 @@
         gap: 10px;
         border-radius: 999px;
         padding: 12px 16px;
+        line-height: 1.1;
         border: 1px solid transparent;
         cursor: pointer;
         user-select: none;
@@ -266,6 +267,9 @@
         font-weight: 700;
         letter-spacing: -0.01em;
         will-change: transform;
+      }
+      .topbar__actions .btn {
+        white-space: nowrap;
       }
       .btn--lg {
         padding: 14px 18px;
@@ -817,7 +821,10 @@
               out.textContent = "Děkujeme! Ozveme se co nejdříve.";
               form.reset();
             } catch (_err) {
-              out.textContent = "Odeslání se nepovedlo. Zkuste to prosím znovu za chvíli.";
+              const msg = _err && typeof _err.message === "string" ? _err.message : "";
+              out.textContent = msg
+                ? `Odeslání se nepovedlo: ${msg}`
+                : "Odeslání se nepovedlo. Zkuste to prosím znovu za chvíli.";
             } finally {
               setBusy(false);
             }
@@ -1159,7 +1166,6 @@
               <div class="form__actions">
                 <button class="btn btn--primary btn--lg" type="submit">Odeslat</button>
               </div>
-              <p class="fine">Odesláním souhlasíte, že vás můžeme kontaktovat ohledně poptávky.</p>
               <p class="success" id="formSuccess" role="status" aria-live="polite" hidden></p>
             </form>
           </div>
