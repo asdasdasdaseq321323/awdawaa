@@ -4,6 +4,7 @@ const express = require("express");
 const helmet = require("helmet");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
+const nodemailer = require("nodemailer");
 
 const app = express();
 
@@ -38,6 +39,21 @@ function requiredEnv(name) {
   return v;
 }
 
+function makeTransporter() {
+  const host = requiredEnv("SMTP_HOST");
+  const port = Number(requiredEnv("SMTP_PORT"));
+  const secure = String(process.env.SMTP_SECURE || "").toLowerCase() === "true" || port === 465;
+  const user = requiredEnv("SMTP_USER");
+  const pass = requiredEnv("SMTP_PASS");
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: { user, pass },
+  });
+}
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -60,48 +76,20 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       return res.status(400).json({ ok: false, error: "Zadejte prosím platný e‑mail." });
     }
 
-    const accessKey = requiredEnv("WEB3FORMS_ACCESS_KEY");
+    const toEmail = requiredEnv("TO_EMAIL");
+    const fromEmail = requiredEnv("FROM_EMAIL");
+    const transporter = makeTransporter();
 
-    const fd = new FormData();
-    fd.set("access_key", accessKey);
-    fd.set("name", cleanName);
-    fd.set("email", cleanEmail);
-    fd.set("message", cleanMessage);
-    fd.set("subject", "Poptávka webu — DesignerWeb");
-    fd.set("from_name", "designerweb.cz");
+    const subject = `Poptávka webu — DesignerWeb (${cleanName})`;
+    const text = `Jméno: ${cleanName}\nE-mail: ${cleanEmail}\n\nZpráva:\n${cleanMessage}\n\n— Odesláno z designerweb.cz`;
 
-    const resp = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Accept-Language": "cs,en;q=0.8",
-        // Cloudflare bot protection sometimes blocks “bare” server requests.
-        // A realistic UA header improves deliverability.
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-      },
-      body: fd,
+    await transporter.sendMail({
+      from: `DesignerWeb <${fromEmail}>`,
+      to: toEmail,
+      replyTo: cleanEmail,
+      subject,
+      text,
     });
-    const raw = await resp.text();
-    let data = {};
-    try {
-      data = raw ? JSON.parse(raw) : {};
-    } catch {
-      data = {};
-    }
-
-    if (!resp.ok || data.success !== true) {
-      const msg =
-        (data && typeof data.message === "string" && data.message.trim()) ||
-        (raw && raw.slice(0, 300).replace(/\s+/g, " ").trim()) ||
-        "Odeslání se nepovedlo (Web3Forms).";
-
-      return res.status(502).json({
-        ok: false,
-        error: msg,
-        status: resp.status,
-      });
-    }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
