@@ -72,7 +72,14 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     const resp = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        "Accept-Language": "cs,en;q=0.8",
+        // Cloudflare bot protection sometimes blocks “bare” server requests.
+        // A realistic UA header improves deliverability.
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      },
       body: fd,
     });
     const raw = await resp.text();
