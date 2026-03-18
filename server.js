@@ -4,7 +4,6 @@ const express = require("express");
 const helmet = require("helmet");
 const compression = require("compression");
 const rateLimit = require("express-rate-limit");
-const nodemailer = require("nodemailer");
 
 const app = express();
 
@@ -39,34 +38,50 @@ function requiredEnv(name) {
   return v;
 }
 
-function makeTransporter() {
-  const host = requiredEnv("SMTP_HOST");
-  const port = Number(requiredEnv("SMTP_PORT"));
-  const secure = String(process.env.SMTP_SECURE || "").toLowerCase() === "true" || port === 465;
-  const user = requiredEnv("SMTP_USER");
-  const pass = requiredEnv("SMTP_PASS");
-
-  // Helpful for Render debugging (no secrets)
-  console.log("SMTP_CONFIG", { host, port, secure, user: String(user).replace(/(.{2}).+(@.*)/, "$1***$2") });
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-    // Avoid hanging requests (causes frontend timeout)
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 12_000,
-    requireTLS: !secure, // enforce STARTTLS on 587
-    tls: {
-      servername: host,
-    },
-  });
-}
-
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function sendViaBrevo({ toEmail, fromEmail, replyToEmail, subject, text }) {
+  const apiKey = requiredEnv("BREVO_API_KEY");
+
+  const payload = {
+    sender: { email: fromEmail, name: "DesignerWeb" },
+    to: [{ email: toEmail }],
+    replyTo: { email: replyToEmail },
+    subject,
+    textContent: text,
+  };
+
+  const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const raw = await resp.text();
+  let data = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = {};
+  }
+
+  if (!resp.ok) {
+    const msg =
+      (data && (data.message || data.error || data.code)) ||
+      (raw && raw.slice(0, 300).replace(/\s+/g, " ").trim()) ||
+      `Brevo error (HTTP ${resp.status})`;
+    const err = new Error(String(msg));
+    err.status = resp.status;
+    throw err;
+  }
+
+  return data;
 }
 
 app.post("/api/contact", contactLimiter, async (req, res) => {
@@ -89,15 +104,14 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
 
     const toEmail = requiredEnv("TO_EMAIL");
     const fromEmail = requiredEnv("FROM_EMAIL");
-    const transporter = makeTransporter();
 
     const subject = `Poptávka webu — DesignerWeb (${cleanName})`;
     const text = `Jméno: ${cleanName}\nE-mail: ${cleanEmail}\n\nZpráva:\n${cleanMessage}\n\n— Odesláno z designerweb.cz`;
 
-    await transporter.sendMail({
-      from: `DesignerWeb <${fromEmail}>`,
-      to: toEmail,
-      replyTo: cleanEmail,
+    await sendViaBrevo({
+      toEmail,
+      fromEmail,
+      replyToEmail: cleanEmail,
       subject,
       text,
     });
@@ -106,32 +120,14 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
   } catch (err) {
     console.error("CONTACT_SEND_ERROR", {
       message: err && err.message,
-      code: err && err.code,
-      responseCode: err && err.responseCode,
-      command: err && err.command,
+      status: err && err.status,
     });
     const msg = err && typeof err.message === "string" ? err.message : "";
     if (msg.startsWith("Missing env var:")) {
       return res.status(500).json({ ok: false, error: msg });
     }
-    const code = err && typeof err.code === "string" ? err.code : "";
-    const responseCode = err && typeof err.responseCode === "number" ? err.responseCode : undefined;
-
-    // Return a useful, non-sensitive error for setup issues.
-    if (code === "EAUTH" || responseCode === 535) {
-      return res.status(500).json({
-        ok: false,
-        error: "SMTP přihlášení selhalo (zkontrolujte SMTP_USER/SMTP_PASS).",
-      });
-    }
-    if (code === "ETIMEDOUT" || code === "ESOCKET" || code === "ECONNECTION" || code === "ECONNRESET") {
-      const host = process.env.SMTP_HOST || "";
-      const port = process.env.SMTP_PORT || "";
-      const secure = process.env.SMTP_SECURE || "";
-      return res.status(500).json({
-        ok: false,
-        error: `Nepodařilo se připojit k SMTP serveru (zkontrolujte SMTP_HOST/SMTP_PORT/SMTP_SECURE). (${host}:${port}, secure=${secure})`,
-      });
+    if (err && typeof err.status === "number") {
+      return res.status(502).json({ ok: false, error: `Brevo: ${msg}` });
     }
     return res.status(500).json({
       ok: false,
