@@ -801,72 +801,17 @@
         }
 
         function initForm() {
-          const form = document.getElementById("leadForm");
           const out = document.getElementById("formSuccess");
-          if (!form || !out) return;
+          if (!out) return;
 
-          function toast(msg) {
+          const url = new URL(window.location.href);
+          if (url.searchParams.get("sent") === "1") {
             out.hidden = false;
-            out.textContent = msg;
+            out.textContent = "Zpráva odeslána! Ozveme se co nejdříve.";
+            // vyčistit URL, aby šla sdílet bez parametru
+            url.searchParams.delete("sent");
+            window.history.replaceState({}, "", url.pathname + url.hash);
           }
-
-          form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const fd = new FormData(form);
-            const name = String(fd.get("name") || "").trim();
-            const email = String(fd.get("email") || "").trim();
-            const message = String(fd.get("message") || "").trim();
-
-            if (!name || !email || !message) {
-              toast("Vyplňte prosím všechna pole.");
-              return;
-            }
-
-            const btn = form.querySelector("button[type=submit]");
-            const originalText = btn ? btn.textContent : "";
-            if (btn) {
-              btn.disabled = true;
-              btn.textContent = "Odesílám…";
-            }
-
-            try {
-              const controller = new AbortController();
-              const t = window.setTimeout(() => controller.abort(), 20000);
-
-              const res = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, message }),
-                signal: controller.signal,
-              });
-              window.clearTimeout(t);
-
-              const ct = res.headers.get("content-type") || "";
-              const data = ct.includes("application/json") ? await res.json().catch(() => ({})) : {};
-
-              if (res.ok && data.ok) {
-                toast("Zpráva odeslána! Ozveme se co nejdříve.");
-                form.reset();
-              } else {
-                const msg =
-                  (data && typeof data.error === "string" && data.error) ||
-                  `Odeslání se nepovedlo (HTTP ${res.status}).`;
-                toast(msg);
-              }
-            } catch (err) {
-              const msg =
-                err && err.name === "AbortError"
-                  ? "Odesílání trvá příliš dlouho. Zkuste to prosím znovu."
-                  : "Něco se pokazilo. Zkuste to znovu.";
-              toast(msg);
-            } finally {
-              if (btn) {
-                btn.disabled = false;
-                btn.textContent = originalText || "Odeslat";
-              }
-            }
-          });
         }
 
         function initYear() {
@@ -1185,6 +1130,8 @@
               class="form"
               id="leadForm"
               autocomplete="on"
+              action="https://formspree.io/f/myknbale"
+              method="POST"
               novalidate
             >
               <div class="form__row">
@@ -1197,6 +1144,7 @@
                   <input name="email" type="email" placeholder="vy@firma.cz" required />
                 </label>
               </div>
+              <input type="hidden" name="_redirect" value="https://designerweb.cz/?sent=1#contact" />
               <label class="field">
                 <span class="field__label">Zpráva</span>
                 <textarea name="message" rows="4" placeholder="Co děláte a jaký web potřebujete?" required></textarea>
