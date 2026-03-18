@@ -801,17 +801,62 @@
         }
 
         function initForm() {
+          const form = document.getElementById("leadForm");
           const out = document.getElementById("formSuccess");
-          if (!out) return;
+          if (!form || !out) return;
 
-          const url = new URL(window.location.href);
-          if (url.searchParams.get("sent") === "1") {
+          function toast(msg) {
             out.hidden = false;
-            out.textContent = "Zpráva odeslána! Ozveme se co nejdříve.";
-            // vyčistit URL, aby šla sdílet bez parametru
-            url.searchParams.delete("sent");
-            window.history.replaceState({}, "", url.pathname + url.hash);
+            out.textContent = msg;
           }
+
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const fd = new FormData(form);
+            const name = String(fd.get("name") || "").trim();
+            const email = String(fd.get("email") || "").trim();
+            const message = String(fd.get("message") || "").trim();
+
+            if (!name || !email || !message) {
+              toast("Vyplňte prosím všechna pole.");
+              return;
+            }
+
+            const btn = form.querySelector("button[type=submit]");
+            const originalText = btn ? btn.textContent : "";
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Odesílám…";
+            }
+
+            try {
+              const res = await fetch("https://formspree.io/f/myknbale", {
+                method: "POST",
+                headers: { Accept: "application/json" },
+                body: fd,
+              });
+
+              const data = await res.json().catch(() => ({}));
+
+              if (res.ok) {
+                toast("Zpráva odeslána! Ozveme se co nejdříve.");
+                form.reset();
+              } else {
+                const msg =
+                  (data && typeof data.message === "string" && data.message) ||
+                  "Odeslání se nepovedlo. Zkuste to prosím znovu.";
+                toast(msg);
+              }
+            } catch {
+              toast("Něco se pokazilo. Zkuste to prosím znovu.");
+            } finally {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText || "Odeslat";
+              }
+            }
+          });
         }
 
         function initYear() {
@@ -1130,8 +1175,6 @@
               class="form"
               id="leadForm"
               autocomplete="on"
-              action="https://formspree.io/f/myknbale"
-              method="POST"
               novalidate
             >
               <div class="form__row">
@@ -1144,7 +1187,6 @@
                   <input name="email" type="email" placeholder="vy@firma.cz" required />
                 </label>
               </div>
-              <input type="hidden" name="_redirect" value="https://designerweb.cz/?sent=1#contact" />
               <label class="field">
                 <span class="field__label">Zpráva</span>
                 <textarea name="message" rows="4" placeholder="Co děláte a jaký web potřebujete?" required></textarea>
