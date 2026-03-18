@@ -46,6 +46,9 @@ function makeTransporter() {
   const user = requiredEnv("SMTP_USER");
   const pass = requiredEnv("SMTP_PASS");
 
+  // Helpful for Render debugging (no secrets)
+  console.log("SMTP_CONFIG", { host, port, secure, user: String(user).replace(/(.{2}).+(@.*)/, "$1***$2") });
+
   return nodemailer.createTransport({
     host,
     port,
@@ -55,6 +58,7 @@ function makeTransporter() {
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 12_000,
+    requireTLS: !secure, // enforce STARTTLS on 587
     tls: {
       servername: host,
     },
@@ -121,9 +125,12 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       });
     }
     if (code === "ETIMEDOUT" || code === "ESOCKET" || code === "ECONNECTION" || code === "ECONNRESET") {
+      const host = process.env.SMTP_HOST || "";
+      const port = process.env.SMTP_PORT || "";
+      const secure = process.env.SMTP_SECURE || "";
       return res.status(500).json({
         ok: false,
-        error: "Nepodařilo se připojit k SMTP serveru (zkontrolujte SMTP_HOST/SMTP_PORT/SMTP_SECURE).",
+        error: `Nepodařilo se připojit k SMTP serveru (zkontrolujte SMTP_HOST/SMTP_PORT/SMTP_SECURE). (${host}:${port}, secure=${secure})`,
       });
     }
     return res.status(500).json({
